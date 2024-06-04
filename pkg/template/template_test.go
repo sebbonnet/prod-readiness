@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/coreeng/production-readiness/production-readiness/pkg/k8s"
@@ -34,6 +35,7 @@ var _ = Describe("Generating vulnerability report", func() {
 	)
 
 	BeforeEach(func() {
+		logr.Info("---- BeforeEach")
 		var err error
 		tmpDir, err = ioutil.TempDir("", "")
 		Expect(err).NotTo(HaveOccurred())
@@ -363,17 +365,7 @@ func aMediumVulnerablity() scanner.Vulnerabilities {
 }
 
 func findProjectDir() string {
-	workingDir, err := os.Getwd()
-	if err != nil {
-		logr.Fatalf("Unable to stat current directory: %v", err)
-	}
-
-	for {
-		parentPath := filepath.Dir(workingDir)
-		parentDirName := filepath.Base(parentPath)
-		if parentDirName == "prod-readiness" {
-			return parentPath
-		}
-		workingDir = parentPath
-	}
+	_, filename, _, _ := runtime.Caller(0)
+	testDir := filepath.Dir(filename)
+	return filepath.Join(testDir + "/../..")
 }
